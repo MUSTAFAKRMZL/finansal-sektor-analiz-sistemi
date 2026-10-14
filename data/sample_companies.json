@@ -1,0 +1,157 @@
+[
+  {
+    "code": "ASELS_SIM",
+    "name": "Aselsan Benzeri Teknoloji A.Ş.",
+    "sector": "Savunma ve Bilişim Teknolojileri",
+    "period": "2023/12",
+    "balance_sheet": {
+      "cash_and_equivalents": 12500000,
+      "accounts_receivable": 24000000,
+      "inventories": 18000000,
+      "other_current_assets": 5500000,
+      "tangible_assets": 32000000,
+      "intangible_assets": 14000000,
+      "other_non_current_assets": 8000000,
+      "short_term_financial_debt": 8000000,
+      "short_term_trade_payables": 14000000,
+      "other_short_term_debt": 6000000,
+      "long_term_financial_debt": 18000000,
+      "other_long_term_debt": 7000000,
+      "paid_in_capital": 25000000,
+      "retained_earnings": 22000000,
+      "net_period_profit_bs": 14000000
+    },
+    "income_statement": {
+      "net_sales": 72000000,
+      "cost_of_sales": 46000000,
+      "operating_expenses": 11000000,
+      "financial_expenses": 3200000,
+      "tax_expenses": 2500000,
+      "net_profit": 14000000
+    }
+  },
+  {
+    "code": "LOGOS_SIM",
+    "name": "Logo Benzeri Yazılım A.Ş.",
+    "sector": "Savunma ve Bilişim Teknolojileri",
+    "period": "2023/12",
+    "balance_sheet": {
+      "cash_and_equivalents": 8500000,
+      "accounts_receivable": 9200000,
+      "inventories": 800000,
+      "other_current_assets": 1500000,
+      "tangible_assets": 4500000,
+      "intangible_assets": 12000000,
+      "other_non_current_assets": 2000000,
+      "short_term_financial_debt": 1500000,
+      "short_term_trade_payables": 3200000,
+      "other_short_term_debt": 1800000,
+      "long_term_financial_debt": 2500000,
+      "other_long_term_debt": 1000000,
+      "paid_in_capital": 10000000,
+      "retained_earnings": 11500000,
+      "net_period_profit_bs": 7000000
+    },
+    "income_statement": {
+      "net_sales": 32000000,
+      "cost_of_sales": 12000000,
+      "operating_expenses": 8500000,
+      "financial_expenses": 900000,
+      "tax_expenses": 1600000,
+      "net_profit": 7000000
+    }
+  },
+  {
+    "code": "RISKY_TECH",
+    "name": "Zarardaki Spekülatif Teknoloji A.Ş.",
+    "sector": "Savunma ve Bilişim Teknolojileri",
+    "period": "2023/12",
+    "balance_sheet": {
+      "cash_and_equivalents": 400000,
+      "accounts_receivable": 2100000,
+      "inventories": 9500000,
+      "other_current_assets": 800000,
+      "tangible_assets": 5000000,
+      "intangible_assets": 6000000,
+      "other_non_current_assets": 1200000,
+      "short_term_financial_debt": 16000000,
+      "short_term_trade_payables": 8000000,
+      "other_short_term_debt": 4000000,
+      "long_term_financial_debt": 12000000,
+      "other_long_term_debt": 3000000,
+      "paid_in_capital": 5000000,
+      "retained_earnings": -15000000,
+      "net_period_profit_bs": -8000000
+    },
+    "income_statement": {
+      "net_sales": 15000000,
+      "cost_of_sales": 14000000,
+      "operating_expenses": 6500000,
+      "financial_expenses": 4200000,
+      "tax_expenses": 100000,
+      "net_profit": -8000000
+    }
+  },
+  {
+    "code": "FROTO_SIM",
+    "name": "Ford Benzeri Otomotiv Sanayi A.Ş.",
+    "sector": "Otomotiv ve Yan Sanayi",
+    "period": "2023/12",
+    "balance_sheet": {
+      "cash_and_equivalents": 18000000,
+      "accounts_receivable": 22000000,
+      "inventories": 28000000,
+      "other_current_assets": 6000000,
+      "tangible_assets": 65000000,
+      "intangible_assets": 8000000,
+      "other_non_current_assets": 12000000,
+      "short_term_financial_debt": 24000000,
+      "short_term_trade_payables": 30000000,
+      "other_short_term_debt": 8000000,
+      "long_term_financial_debt": 35000000,
+      "other_long_term_debt": 12000000,
+      "paid_in_capital": 15000000,
+      "retained_earnings": 22000000,
+      "net_period_profit_bs": 13000000
+    },
+    "income_statement": {
+      "net_sales": 145000000,
+      "cost_of_sales": 115000000,
+      "operating_expenses": 12000000,
+      "financial_expenses": 6000000,
+      "tax_expenses": 3000000,
+      "net_profit": 13000000
+    }
+  },
+  {
+    "code": "TOASO_SIM",
+    "name": "Tofaş Benzeri Türk Otomobil Fabrikası A.Ş.",
+    "sector": "Otomotiv ve Yan Sanayi",
+    "period": "2023/12",
+    "balance_sheet": {
+      "cash_and_equivalents": 16000000,
+      "accounts_receivable": 19000000,
+      "inventories": 24000000,
+      "other_current_assets": 5000000,
+      "tangible_assets": 52000000,
+      "intangible_assets": 6000000,
+      "other_non_current_assets": 9000000,
+      "short_term_financial_debt": 19000000,
+      "short_term_trade_payables": 26000000,
+      "other_short_term_debt": 7000000,
+      "long_term_financial_debt": 28000000,
+      "other_long_term_debt": 10000000,
+      "paid_in_capital": 12000000,
+      "retained_earnings": 18000000,
+      "net_period_profit_bs": 11000000
+    },
+    "income_statement": {
+      "net_sales": 120000000,
+      "cost_of_sales": 96000000,
+      "operating_expenses": 9500000,
+      "financial_expenses": 4500000,
+      "tax_expenses": 2500000,
+      "net_profit": 11000000
+    }
+  }
+]
