@@ -1,35 +1,18 @@
 """
 main.py
 Şirketlerin Finansal Performansını Sektörleriyle Karşılaştıran Akıllı Analiz Sistemi
-Hafta 1 Çekirdek Prototip Çalıştırıcısı.
+Hafta 3 (v0.3.0): Veri Normalizasyonu, Isolation Forest Makine Öğrenmesi Anomali Motoru
+ve İnteraktif Web Görsel Analiz Ekranı (dashboard.html).
 """
 import os
-import json
-from src.models import BalanceSheet, IncomeStatement, Company
+import sys
+from src.data_loader import FinancialDataLoader
 from src.ratios import FinancialRatioCalculator
 from src.sector_analysis import SectorAnalyzer
 from src.anomaly_detector import FinancialAnomalyDetector
-
-def load_companies(file_path: str):
-    with open(file_path, "r", encoding="utf-8") as f:
-        data = json.load(f)
-
-    companies = []
-    for item in data:
-        bs_data = item["balance_sheet"]
-        inc_data = item["income_statement"]
-        bs = BalanceSheet(**bs_data)
-        inc = IncomeStatement(**inc_data)
-        comp = Company(
-            code=item["code"],
-            name=item["name"],
-            sector=item["sector"],
-            period=item["period"],
-            balance_sheet=bs,
-            income_statement=inc
-        )
-        companies.append(comp)
-    return companies
+from src.ml_anomaly import HybridAnomalyEngine
+from src.database import DatabaseManager
+from src.web_dashboard import DashboardGenerator
 
 def format_table(headers, rows):
     widths = [len(h) for h in headers]
@@ -43,63 +26,107 @@ def format_table(headers, rows):
     return f"{header_str}\n{sep_str}\n" + "\n".join(row_strs)
 
 def main():
-    print("=" * 75)
-    print("  AKILLI FİNANSAL PERFORMANS VE SEKTÖREL ANOMALİ ANALİZ SİSTEMİ  ")
-    print("  Yazılım Geliştirme I - Hafta 1 Çekirdek Prototip  ")
-    print("=" * 75)
+    print("=" * 88)
+    print("  AKILLI FİNANSAL PERFORMANS VE SEKTÖREL ANOMALİ ANALİZ SİSTEMİ (v0.3.0)  ")
+    print("  Yazılım Geliştirme I - Hafta 3: Hibrit ML (Isolation Forest) & Web Dashboard  ")
+    print("=" * 88)
 
     base_dir = os.path.dirname(os.path.abspath(__file__))
-    data_path = os.path.join(base_dir, "data", "sample_companies.json")
+    csv_path = os.path.join(base_dir, "data", "companies_financials.csv")
+    db_path = os.path.join(base_dir, "financial_analysis.db")
+    dashboard_path = os.path.join(base_dir, "dashboard.html")
 
-    print(f"\n[1] Veri seti yükleniyor: {data_path}")
-    companies = load_companies(data_path)
-    print(f" -> {len(companies)} şirket başarıyla yüklendi.")
+    print(f"\n[1] Veritabanı başlatılıyor: {db_path}")
+    db = DatabaseManager(db_path)
 
-    # 1. Sektör Analizini Başlat
+    print(f"[2] CSV dosyasından şirket finansalları okunuyor: {csv_path}")
+    companies = FinancialDataLoader.load_from_csv(csv_path)
+    print(f" -> {len(companies)} şirket başarıyla okundu ve doğrulandı.")
+
+    print("[3] Şirket verileri SQLite veritabanına kaydediliyor...")
+    for comp in companies:
+        db.save_company(comp)
+
+    # 4. Sektör ve İstatistiksel Analiz
     analyzer = SectorAnalyzer(companies)
-
-    # 2. Her bir şirket için karşılaştırma ve risk analizi yap
     detector = FinancialAnomalyDetector(z_threshold=1.5)
 
+    company_comparisons = {}
+    base_risk_reports = {}
     for comp in companies:
-        print("\n" + "#" * 75)
-        print(f" ŞİRKET: {comp.name} [{comp.code}]")
-        print(f" SEKTÖR: {comp.sector} | DÖNEM: {comp.period}")
-        print("#" * 75)
+        ratios = analyzer.company_ratios[comp.code]
+        db.save_ratios(comp.code, comp.period, ratios)
 
-        # Karşılaştırma Raporu
         comp_report = analyzer.compare_company_with_sector(comp.code)
         risk_report = detector.evaluate_risk(comp_report)
+        company_comparisons[comp.code] = comp_report
+        base_risk_reports[comp.code] = risk_report
 
-        headers = ["Kategori", "Finansal Gösterge", "Şirket Değeri", "Sektör Ort.", "Fark (%)", "Z-Skor"]
-        rows = []
-        for c in comp_report["comparisons"]:
-            metric_label = c["metric"].replace("_", " ").title()
-            val = f"{c['company_value']:.4f}" if c["company_value"] is not None else "N/A"
-            mean = f"{c['sector_mean']:.4f}" if c["sector_mean"] is not None else "N/A"
-            diff = f"{c['diff_percentage']:+.1f}%" if c["diff_percentage"] is not None else "N/A"
-            z = f"{c['z_score']:+.2f}" if c["z_score"] is not None else "-"
-            rows.append([c["category"].upper(), metric_label, val, mean, diff, z])
+    # 5. Hafta 3: Veri Normalizasyonu ve Makine Öğrenmesi (Isolation Forest + k-NN) Hibrit Motoru
+    print("[4] Min-Max Veri Normalizasyonu ve Isolation Forest (ML) modeli eğitiliyor...")
+    ml_engine = HybridAnomalyEngine()
+    hybrid_reports = ml_engine.analyze_all_companies(
+        companies=companies,
+        company_ratios=analyzer.company_ratios,
+        base_risk_reports=base_risk_reports
+    )
 
-        print(format_table(headers, rows))
+    for comp in companies:
+        h_rep = hybrid_reports[comp.code]
+        # Veritabanına hibrit risk skorunu kaydet
+        db_record = dict(h_rep)
+        db_record["risk_score"] = h_rep["hybrid_risk_score"]
+        db_record["risk_level"] = h_rep["hybrid_risk_level"]
+        db.save_anomaly_result(comp.code, comp.period, db_record)
 
-        print("\n--- ANOMALİ VE RİSK DEĞERLENDİRMESİ ---")
-        print(f"Bileşik Risk Puanı: {risk_report['risk_score']} / 100")
-        print(f"Risk Durumu:        {risk_report['risk_level']}")
-        
-        if risk_report["anomalies"]:
-            print(f"Tespit Edilen İstatistiksel Anomaliler ({risk_report['anomaly_count']} Adet):")
-            for a in risk_report["anomalies"]:
-                print(f"  * {a['metric']}: {a['message']} (Değer: {a['value']}, Z: {a['z_score']})")
+    # 6. İnteraktif Görsel Analiz Ekranı (HTML5 + SVG Radar & Bar Charts) Üretimi
+    out_html = DashboardGenerator.export_dashboard(
+        companies=companies,
+        sector_benchmarks=analyzer.sector_benchmarks,
+        company_comparisons=company_comparisons,
+        hybrid_reports=hybrid_reports,
+        output_path=dashboard_path
+    )
+    print(f"[5] İnteraktif Görsel Analiz Ekranı üretildi: {out_html}")
 
-        if risk_report["critical_flags"]:
-            print("Kritik Finansal Uyarılar:")
-            for flag in risk_report["critical_flags"]:
-                print(f"  ! {flag}")
+    # 7. Konsol Özet Tablosu
+    print("\n" + "=" * 88)
+    print("  ŞİRKET FİNANSAL PERFORMANS VE HİBRİT MAKİNE ÖĞRENMESİ RİSK SIRALAMASI  ")
+    print("=" * 88)
 
-    print("\n" + "=" * 75)
-    print(" Analiz Başarıyla Tamamlandı.")
-    print("=" * 75)
+    headers = [
+        "Kod", "Şirket Adı", "Sektör", "Cari Or.", "Kaldıraç",
+        "İstat. Skor", "IForest (ML)", "k-NN Skor", "Hibrit Risk", "Risk Seviyesi"
+    ]
+    rows = []
+    for comp in companies:
+        summary = db.get_company_summary(comp.code)
+        h_rep = hybrid_reports[comp.code]
+        c_ratio = f"{summary.get('current_ratio', 0):.2f}" if summary.get('current_ratio') else "-"
+        lev = f"{summary.get('financial_leverage', 0):.2f}" if summary.get('financial_leverage') else "-"
+
+        rows.append([
+            comp.code,
+            comp.name[:22],
+            comp.sector[:16],
+            c_ratio,
+            lev,
+            f"{h_rep['statistical_rule_score']:.1f}",
+            f"{h_rep['isolation_forest_score']:.1f}",
+            f"{h_rep['knn_outlier_score']:.1f}",
+            f"{h_rep['hybrid_risk_score']:.1f} / 100",
+            h_rep["hybrid_risk_level"][:20]
+        ])
+
+    print(format_table(headers, rows))
+
+    print("\n" + "=" * 88)
+    print(f" Görsel Analiz Dashboard Hazır: {out_html}")
+    print(" Tarayıcıda doğrudan açabilir veya 'python main.py --serve' ile sunucuyu başlatabilirsiniz.")
+    print("=" * 88)
+
+    if "--serve" in sys.argv:
+        DashboardGenerator.serve_dashboard(port=8080)
 
 if __name__ == "__main__":
     main()
