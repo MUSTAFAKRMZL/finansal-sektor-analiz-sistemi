@@ -2,7 +2,7 @@
 
 - **Ders:** Yazılım Geliştirme I
 - **Proje Adı:** Şirketlerin Finansal Performansını Sektörleriyle Karşılaştıran Akıllı Analiz Sistemi
-- **Öğrenci Adı Soyadı:** Mustafa Kırmızı
+- **Öğrenci Adı Soyadı:** Muhammet Mustafa Kırmızı
 - **Öğrenci No:** 24130766
 - **Hafta No:** 2
 - **Tarih:** 21 / 10 / 2026
@@ -106,7 +106,7 @@ Python Standart Kütüphanesi (`sqlite3`, `csv`, `json`, `math`, `contextlib`, `
 ---
 
 ## 6. KOD VE PROJE KANITLARI
-- **GitHub / Repository:** https://github.com/mustafakirmizi/finansal-sektor-analiz-sistemi
+- **GitHub / Repository:** https://github.com/MUSTAFAKRMZL/finansal-sektor-analiz-sistemi
 - **Commit Sayısı:** 3 commit
 - **Önemli Commitler:**
   - `feat: Hafta 2 - CSV veri yukleyici, SQLite veritabani ve cok boyutlu anomali motoru`

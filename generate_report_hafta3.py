@@ -95,7 +95,7 @@ def main():
     header_items = [
         ("Ders: ", True), ("Yazılım Geliştirme I", False), ("br", None),
         ("Proje Adı: ", True), ("Şirketlerin Finansal Performansını Sektörleriyle Karşılaştıran Akıllı Analiz Sistemi", False), ("br", None),
-        ("Öğrenci Adı Soyadı: ", True), ("Mustafa Kırmızı", False), ("br", None),
+        ("Öğrenci Adı Soyadı: ", True), ("Muhammet Mustafa Kırmızı", False), ("br", None),
         ("Öğrenci No: ", True), ("24130766", False), ("br", None),
         ("Hafta No: ", True), ("3", False), ("br", None),
         ("Tarih: ", True), ("28 / 10 / 2026", False)
@@ -185,7 +185,7 @@ def main():
 
     # 7. BÖLÜM 6: KOD VE PROJE KANITLARI
     p_git = find_p("GitHub / GitLab / Repository bağlantısı:")
-    set_p_text(body[list(body).index(p_git)+1], "https://github.com/mustafakirmizi/finansal-sektor-analiz-sistemi")
+    set_p_text(body[list(body).index(p_git)+1], "https://github.com/MUSTAFAKRMZL/finansal-sektor-analiz-sistemi")
 
     p_commit_sayi = find_p("Bu hafta yaptığınız yaklaşık commit sayısı:")
     set_p_text(body[list(body).index(p_commit_sayi)+1], "3 commit")

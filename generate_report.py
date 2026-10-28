@@ -70,10 +70,20 @@ def set_p_text(p, text, bold=False, num_pr=False):
                 p.append(make_br())
 
 def main():
-    src_docx = r"C:\Users\MONSTER\Downloads\Mustafa Kırmızı - HAFTALIK YAZILIM PROJESİ GELİŞİM RAPORU.docx"
     dest_dir = r"c:\Users\MONSTER\Desktop\yazılımgeliştirme1ödev"
+    artifact_template = r"C:\Users\MONSTER\.gemini\antigravity\brain\58f099fd-ce79-44eb-8506-e920cd864e74\.user_uploaded\media_1791985975159_5d2c237c.docx"
+    downloads_template = r"C:\Users\MONSTER\Downloads\Mustafa Kırmızı - HAFTALIK YAZILIM PROJESİ GELİŞİM RAPORU.docx"
+    existing_h1 = os.path.join(dest_dir, "Mustafa_Kirmizi_Haftalik_Gelisim_Raporu_Hafta_1.docx")
+
+    if os.path.exists(artifact_template):
+        src_docx = artifact_template
+    elif os.path.exists(existing_h1):
+        src_docx = existing_h1
+    else:
+        src_docx = downloads_template
+
     dest_docx_1 = os.path.join(dest_dir, "Mustafa_Kirmizi_Haftalik_Gelisim_Raporu_Hafta_1.docx")
-    dest_docx_2 = src_docx # Also update the one in Downloads
+    dest_docx_2 = downloads_template # Also update the one in Downloads if possible
 
     print(f"Kaynak dosya: {src_docx}")
     with zipfile.ZipFile(src_docx, 'r') as zin:
@@ -93,7 +103,7 @@ def main():
     header_items = [
         ("Ders: ", True), ("Yazılım Geliştirme I", False), ("br", None),
         ("Proje Adı: ", True), ("Şirketlerin Finansal Performansını Sektörleriyle Karşılaştıran Akıllı Analiz Sistemi", False), ("br", None),
-        ("Öğrenci Adı Soyadı: ", True), ("Mustafa Kırmızı", False), ("br", None),
+        ("Öğrenci Adı Soyadı: ", True), ("Muhammet Mustafa Kırmızı", False), ("br", None),
         ("Öğrenci No: ", True), ("24130766", False), ("br", None),
         ("Hafta No: ", True), ("1", False), ("br", None),
         ("Tarih: ", True), ("14 / 10 / 2026", False)
@@ -198,7 +208,7 @@ def main():
 
     # 7. BÖLÜM 6: KOD VE PROJE KANITLARI
     p_git = find_p("GitHub / GitLab / Repository bağlantısı:")
-    set_p_text(body[list(body).index(p_git)+1], "https://github.com/mustafakirmizi/finansal-sektor-analiz-sistemi")
+    set_p_text(body[list(body).index(p_git)+1], "https://github.com/MUSTAFAKRMZL/finansal-sektor-analiz-sistemi")
 
     p_commit_sayi = find_p("Bu hafta yaptığınız yaklaşık commit sayısı:")
     set_p_text(body[list(body).index(p_commit_sayi)+1], "2 commit")
@@ -483,10 +493,13 @@ def main():
     all_files['word/document.xml'] = new_xml
 
     for out_path in [dest_docx_1, dest_docx_2]:
-        with zipfile.ZipFile(out_path, 'w', compression=zipfile.ZIP_DEFLATED) as zout:
-            for name, data in all_files.items():
-                zout.writestr(name, data)
-        print(f"Rapor başarıyla kaydedildi: {out_path}")
+        try:
+            with zipfile.ZipFile(out_path, 'w', compression=zipfile.ZIP_DEFLATED) as zout:
+                for name, data in all_files.items():
+                    zout.writestr(name, data)
+            print(f"Rapor başarıyla kaydedildi: {out_path}")
+        except Exception as e:
+            print(f"Bilgi: {out_path} kaydedilemedi ({e}), dest_docx_1 guncellendi.")
 
 if __name__ == "__main__":
     main()

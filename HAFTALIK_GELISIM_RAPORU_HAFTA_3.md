@@ -2,7 +2,7 @@
 
 - **Ders:** Yazılım Geliştirme I
 - **Proje Adı:** Şirketlerin Finansal Performansını Sektörleriyle Karşılaştıran Akıllı Analiz Sistemi
-- **Öğrenci Adı Soyadı:** Mustafa Kırmızı
+- **Öğrenci Adı Soyadı:** Muhammet Mustafa Kırmızı
 - **Öğrenci No:** 24130766
 - **Hafta No:** 3
 - **Tarih:** 28 / 10 / 2026
@@ -96,7 +96,7 @@ Proje, sadece arka uçta çalışan bir konsol uygulaması olmaktan çıkarak; m
 ---
 
 ## 6. KOD VE PROJE KANITLARI
-- **GitHub / Repository:** https://github.com/mustafakirmizi/finansal-sektor-analiz-sistemi
+- **GitHub / Repository:** https://github.com/MUSTAFAKRMZL/finansal-sektor-analiz-sistemi
 - **Commit Sayısı:** 3 commit
 - **Önemli Commitler:**
   - `feat: Hafta 3 - Min-Max veri normalizasyonu, Isolation Forest ve k-NN ML anomali modelleri (src/ml_anomaly.py)`
