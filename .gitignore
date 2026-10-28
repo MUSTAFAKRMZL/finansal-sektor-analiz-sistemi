@@ -1,6 +1,21 @@
+# Byte-compiled / optimized / DLL files
 __pycache__/
-*.pyc
+*.py[cod]
+*$py.class
+
+# Database
+*.db
+*.sqlite3
+
+# Office / Word Raporlari
+*.docx
+*.doc
+
+# Haftalik Gelisim Raporlari ve Rapor Uretecleri (Yerel Gelistirme Dosyalari)
+HAFTALIK_GELISIM_RAPORU_*.md
+generate_report*.py
+
+# Environments and IDE
 .vscode/
 .idea/
-*.docx
-*.db
+.env
