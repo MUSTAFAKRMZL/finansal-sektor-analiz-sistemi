@@ -430,7 +430,7 @@ class DashboardGenerator:
     <div class="card">
         <div class="card-header">
             <div>
-                <span class="card-title">📈 3 Yıllık Tarihsel Trend ve Altman Z-Score İflas Modeli (2021 - 2023)</span>
+                <span class="card-title">📈 3 Yıllık Tarihsel Trend ve Altman Z-Score İflas Modeli (2023 - 2025)</span>
                 <p style="font-size: 0.8rem; color: var(--text-muted); margin-top: 4px;" id="trendSubTitle">Dönemler arası büyüme oranları, rasyo değişimleri ve iflas olasılığı gidişatı</p>
             </div>
             <span id="trendTrajectoryBadge" class="tag tag-low">Gidişat: Pozitif</span>

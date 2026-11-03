@@ -55,7 +55,9 @@ def main():
         db.save_ratios(comp.code, comp.period, ratios)
 
     # 4. En güncel dönem için Sektörel Kıyaslama ve Makine Öğrenmesi
-    latest_companies = [c for c in all_companies if c.period == "2023/12"]
+    latest_period = max(c.period for c in all_companies)
+    latest_companies = [c for c in all_companies if c.period == latest_period]
+    print(f" -> En güncel dönem ({latest_period}) için {len(latest_companies)} şirket benchmark analizine alınıyor.")
     analyzer = SectorAnalyzer(latest_companies)
     detector = FinancialAnomalyDetector(z_threshold=1.5)
 

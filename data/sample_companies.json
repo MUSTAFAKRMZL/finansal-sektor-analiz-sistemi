@@ -3,7 +3,7 @@
     "code": "ASELS_SIM",
     "name": "Aselsan Benzeri Teknoloji A.Ş.",
     "sector": "Savunma ve Bilişim Teknolojileri",
-    "period": "2023/12",
+    "period": "2025/12",
     "balance_sheet": {
       "cash_and_equivalents": 12500000,
       "accounts_receivable": 24000000,
@@ -34,7 +34,7 @@
     "code": "LOGOS_SIM",
     "name": "Logo Benzeri Yazılım A.Ş.",
     "sector": "Savunma ve Bilişim Teknolojileri",
-    "period": "2023/12",
+    "period": "2025/12",
     "balance_sheet": {
       "cash_and_equivalents": 8500000,
       "accounts_receivable": 9200000,
@@ -65,7 +65,7 @@
     "code": "RISKY_TECH",
     "name": "Zarardaki Spekülatif Teknoloji A.Ş.",
     "sector": "Savunma ve Bilişim Teknolojileri",
-    "period": "2023/12",
+    "period": "2025/12",
     "balance_sheet": {
       "cash_and_equivalents": 400000,
       "accounts_receivable": 2100000,
@@ -96,7 +96,7 @@
     "code": "FROTO_SIM",
     "name": "Ford Benzeri Otomotiv Sanayi A.Ş.",
     "sector": "Otomotiv ve Yan Sanayi",
-    "period": "2023/12",
+    "period": "2025/12",
     "balance_sheet": {
       "cash_and_equivalents": 18000000,
       "accounts_receivable": 22000000,
@@ -127,7 +127,7 @@
     "code": "TOASO_SIM",
     "name": "Tofaş Benzeri Türk Otomobil Fabrikası A.Ş.",
     "sector": "Otomotiv ve Yan Sanayi",
-    "period": "2023/12",
+    "period": "2025/12",
     "balance_sheet": {
       "cash_and_equivalents": 16000000,
       "accounts_receivable": 19000000,

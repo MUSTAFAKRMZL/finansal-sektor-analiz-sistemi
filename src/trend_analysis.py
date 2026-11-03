@@ -1,7 +1,7 @@
 """
 src/trend_analysis.py
 Çok Dönemli Tarihsel Zaman Serisi ve Trend Analizi Modülü (TrendAnalyzer).
-Şirketlerin 3 yıllık (2021-2023) mali tablolarını inceleyerek;
+Şirketlerin 3 yıllık (2023-2025) mali tablolarını inceleyerek;
 - Dönemsel büyüme oranları (YoY) ve CAGR (Bileşik Yıllık Büyüme Oranı),
 - Finansal rasyo değişim dinamikleri (Cari oran, borçluluk, kârlılık yönü),
 - Altman Z-Score iflas riski modeli ve gidişat trendini hesaplar.

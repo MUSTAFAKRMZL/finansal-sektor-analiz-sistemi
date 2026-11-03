@@ -6,7 +6,7 @@ Bu proje, şirketlerin bilanço ve gelir tablosu verilerini kullanarak finansal 
 - **Hafta 1:** Gereksinim analizi, veri modelleme (`models.py`), 14 finansal oran hesaplama motoru (`ratios.py`), Z-Score sektör analizi (`sector_analysis.py`) ve ilk risk puanlayıcı.
 - **Hafta 2:** CSV/JSON şema doğrulamalı veri yükleyici (`data_loader.py`), 3 sektör / 10 şirketlik veri seti (`companies_financials.csv`), 4 tablolu ilişkisel SQLite veritabanı (`database.py`) ve çok boyutlu Öklid uzaklığı.
 - **Hafta 3:** Min-Max veri normalizasyonu, `Isolation Forest` (İzolasyon Ormanı) ve `k-NN` makine öğrenmesi anomali modelleri (`ml_anomaly.py`), Hibrit Risk Motoru ve SVG Radar/Bar grafikli İnteraktif Web Dashboard + Canlı Bilanço Simülatörü (`web_dashboard.py` & `dashboard.html`).
-- **Hafta 4:** Çok dönemli zaman serisi analizi (`trend_analysis.py`: 2021-2023 3 yıllık veri seti, CAGR ve Altman Z-Score İflas Modeli), Akıllı Finansal Yorum ve Yönetici Özeti Motoru (`executive_commentary.py`), Dashboard'da 3 yıllık trend ve AI karne paneli, tek tıkla yazdırılabilir / PDF çıktı özelliği (`@media print`).
+- **Hafta 4:** Çok dönemli zaman serisi analizi (`trend_analysis.py`: 2023-2025 3 yıllık veri seti, CAGR ve Altman Z-Score İflas Modeli), Akıllı Finansal Yorum ve Yönetici Özeti Motoru (`executive_commentary.py`), Dashboard'da 3 yıllık trend ve AI karne paneli, tek tıkla yazdırılabilir / PDF çıktı özelliği (`@media print`).
 
 ## Kurulum ve Çalıştırma
 
