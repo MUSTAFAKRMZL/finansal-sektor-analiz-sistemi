@@ -1,14 +1,15 @@
 """
 src/web_dashboard.py
-Hafta 3: İnteraktif Görsel Analiz Ekranı (Web Dashboard) Üreticisi ve Yerel Web Sunucusu.
+Hafta 4: İnteraktif Görsel Analiz Ekranı (Web Dashboard) Üreticisi ve Yerel Web Sunucusu.
 Şirketlerin finansal rasyolarını, sektör ortalaması/medyanı karşılaştırmalarını,
-Isolation Forest + Z-Score hibrit risk puanlarını ve canlı bilanço simülatörünü
-içeren bağımsız HTML5/JS/SVG görsel analiz ekranı üretir.
+Isolation Forest + Z-Score hibrit risk puanlarını, 3 yıllık tarihsel trend ve Altman Z-Score
+iflas tahmin modelini, Akıllı Finansal Yorum Asistanı ve tek tıkla yazdırılabilir/PDF
+finansal karnesini içeren bağımsız HTML5/JS/SVG görsel analiz ekranı üretir.
 """
 import os
 import json
 from http.server import HTTPServer, SimpleHTTPRequestHandler
-from typing import List, Dict, Any
+from typing import List, Dict, Any, Optional
 from src.models import Company
 
 class DashboardGenerator:
@@ -20,6 +21,8 @@ class DashboardGenerator:
         sector_benchmarks: Dict[str, Any],
         company_comparisons: Dict[str, Dict[str, Any]],
         hybrid_reports: Dict[str, Dict[str, Any]],
+        trend_reports: Optional[Dict[str, Any]] = None,
+        commentaries: Optional[Dict[str, Any]] = None,
         output_path: str = "dashboard.html"
     ) -> str:
         payload = {
@@ -39,7 +42,9 @@ class DashboardGenerator:
             ],
             "sector_benchmarks": sector_benchmarks,
             "comparisons": company_comparisons,
-            "hybrid_reports": hybrid_reports
+            "hybrid_reports": hybrid_reports,
+            "trend_reports": trend_reports or {},
+            "commentaries": commentaries or {}
         }
 
         json_payload = json.dumps(payload, ensure_ascii=False)
@@ -78,6 +83,7 @@ class DashboardGenerator:
         }}
         .brand h1 {{ font-size: 1.35rem; font-weight: 700; color: var(--accent-blue); letter-spacing: 0.3px; }}
         .brand p {{ font-size: 0.85rem; color: var(--text-muted); }}
+        .header-actions {{ display: flex; gap: 12px; align-items: center; }}
         .badge-version {{
             background: rgba(56, 189, 248, 0.15);
             color: var(--accent-blue);
@@ -86,6 +92,24 @@ class DashboardGenerator:
             border-radius: 999px;
             font-size: 0.8rem;
             font-weight: 600;
+        }}
+        .btn-print {{
+            background: rgba(99, 102, 241, 0.2);
+            color: #a5b4fc;
+            border: 1px solid rgba(99, 102, 241, 0.4);
+            padding: 6px 14px;
+            border-radius: 8px;
+            font-size: 0.82rem;
+            font-weight: 600;
+            cursor: pointer;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            transition: all 0.2s;
+        }}
+        .btn-print:hover {{
+            background: var(--accent-indigo);
+            color: #ffffff;
         }}
         .container {{ max-width: 1400px; margin: 24px auto; padding: 0 24px; }}
         .kpi-grid {{ display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 16px; margin-bottom: 24px; }}
@@ -130,6 +154,7 @@ class DashboardGenerator:
             border: 1px solid var(--border-color);
             border-radius: 12px;
             padding: 20px;
+            margin-bottom: 24px;
         }}
         .card-header {{
             display: flex;
@@ -172,10 +197,35 @@ class DashboardGenerator:
         th, td {{ padding: 10px 12px; text-align: left; border-bottom: 1px solid var(--border-color); }}
         th {{ color: var(--text-muted); font-weight: 600; background: rgba(15, 23, 42, 0.5); }}
         tr:hover {{ background: var(--bg-card-hover); }}
-        .tag {{ padding: 3px 8px; border-radius: 6px; font-size: 0.75rem; font-weight: 600; }}
+        .tag {{ padding: 3px 8px; border-radius: 6px; font-size: 0.75rem; font-weight: 600; display: inline-block; }}
         .tag-low {{ background: rgba(16, 185, 129, 0.2); color: #34d399; }}
         .tag-med {{ background: rgba(245, 158, 11, 0.2); color: #fbbf24; }}
         .tag-high {{ background: rgba(239, 68, 68, 0.2); color: #f87171; }}
+
+        .commentary-grid {{ display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-top: 16px; }}
+        @media (max-width: 900px) {{ .commentary-grid {{ grid-template-columns: 1fr; }} }}
+        .commentary-box {{
+            background: #0f172a;
+            border: 1px solid var(--border-color);
+            border-radius: 10px;
+            padding: 16px;
+        }}
+        .commentary-box h4 {{
+            font-size: 0.88rem;
+            color: var(--accent-blue);
+            margin-bottom: 10px;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }}
+        .commentary-box ul {{ list-style-type: none; display: flex; flex-direction: column; gap: 8px; font-size: 0.84rem; }}
+        .commentary-box li {{ line-height: 1.45; }}
+        .commentary-box li.str {{ color: #a7f3d0; }}
+        .commentary-box li.str::before {{ content: "✓ "; font-weight: bold; color: var(--accent-green); }}
+        .commentary-box li.weak {{ color: #fecaca; }}
+        .commentary-box li.weak::before {{ content: "⚠ "; font-weight: bold; color: var(--accent-red); }}
+        .commentary-box li.rec {{ color: #e2e8f0; }}
+        .commentary-box li.rec::before {{ content: "➤ "; font-weight: bold; color: var(--accent-indigo); }}
 
         .sim-grid {{ display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 12px; margin-bottom: 16px; }}
         .btn-primary {{
@@ -192,6 +242,28 @@ class DashboardGenerator:
         .legend {{ display: flex; gap: 16px; justify-content: center; margin-top: 8px; font-size: 0.8rem; color: var(--text-muted); }}
         .legend span {{ display: inline-flex; align-items: center; gap: 6px; }}
         .dot {{ width: 10px; height: 10px; border-radius: 50%; display: inline-block; }}
+
+        /* Print Styles for PDF / Print Output */
+        @media print {{
+            body {{ background-color: #ffffff; color: #000000; padding: 0; }}
+            header {{ background: #f8fafc; border-bottom: 2px solid #334155; color: #000000; padding: 12px 16px; }}
+            .brand h1 {{ color: #0f172a; font-size: 1.2rem; }}
+            .brand p {{ color: #475569; }}
+            .btn-print, .controls-bar, .sim-grid, .btn-primary, #simResultBox {{ display: none !important; }}
+            .card {{ background: #ffffff; border: 1px solid #cbd5e1; color: #000000; margin-bottom: 16px; break-inside: avoid; }}
+            .card-title {{ color: #0f172a; }}
+            .score-pill {{ background: #f1f5f9; border-color: #cbd5e1; }}
+            .score-pill .lbl {{ color: #475569; }}
+            .score-pill .val {{ color: #0f172a !important; }}
+            .commentary-box {{ background: #f8fafc; border-color: #e2e8f0; color: #0f172a; }}
+            .commentary-box h4 {{ color: #1e293b; }}
+            .commentary-box li.str {{ color: #065f46; }}
+            .commentary-box li.weak {{ color: #991b1b; }}
+            .commentary-box li.rec {{ color: #1e1b4b; }}
+            th {{ background: #f1f5f9; color: #1e293b; border-bottom: 2px solid #94a3b8; }}
+            td {{ border-bottom: 1px solid #e2e8f0; color: #1e293b; }}
+            table tr:hover {{ background: transparent; }}
+        }}
     </style>
 </head>
 <body>
@@ -199,9 +271,12 @@ class DashboardGenerator:
 <header>
     <div class="brand">
         <h1>Şirketlerin Finansal Performansını Sektörleriyle Karşılaştıran Akıllı Analiz Sistemi</h1>
-        <p>Yazılım Geliştirme I • Hafta 3: Veri Normalizasyonu, Isolation Forest ML Anomali Tespiti ve Görsel Analiz Ekranı</p>
+        <p>Yazılım Geliştirme I • Hafta 4: Çok Dönemli Zaman Serisi (Trend), Altman Z-Score İflas Modeli ve Akıllı Finansal Yorum Asistanı</p>
     </div>
-    <div class="badge-version">Sürüm v0.3.0 • Hibrit ML Motoru Aktif</div>
+    <div class="header-actions">
+        <button class="btn-print" onclick="window.print()">🖨️ Şirket Finansal Karnesini Yazdır / PDF</button>
+        <div class="badge-version">Sürüm v0.4.0 • Karar Destek & Trend Analizi Aktif</div>
+    </div>
 </header>
 
 <div class="container">
@@ -316,6 +391,89 @@ class DashboardGenerator:
         </div>
     </div>
 
+    <!-- Hafta 4 Yeni: Akıllı Finansal Yorum Asistanı & Yönetici Özeti -->
+    <div class="card">
+        <div class="card-header">
+            <div>
+                <span class="card-title">🤖 Akıllı Finansal Yorum Asistanı & Yönetici Özeti</span>
+                <p style="font-size: 0.8rem; color: var(--text-muted); margin-top: 4px;" id="commentarySubTitle">Şirketin rasyoları, makine öğrenmesi skoru ve trendine göre üretilmiş yapay zekâ analiz raporu</p>
+            </div>
+            <span id="commentaryRiskBadge" class="tag tag-low">Karne Hazır</span>
+        </div>
+
+        <div style="background: #0f172a; border: 1px solid var(--border-color); border-radius: 10px; padding: 16px; margin-bottom: 16px;">
+            <h4 style="font-size: 0.88rem; color: var(--accent-blue); margin-bottom: 6px;">📌 Genel Yönetici Teşhisi:</h4>
+            <p id="commentaryBrief" style="font-size: 0.92rem; color: #f1f5f9; line-height: 1.6;"></p>
+        </div>
+
+        <div class="commentary-grid">
+            <div class="commentary-box">
+                <h4>🟢 Güçlü Yönler (Strengths)</h4>
+                <ul id="commentaryStrengths"></ul>
+            </div>
+            <div class="commentary-box">
+                <h4>🔴 Zayıf Yönler ve Risk Sinyalleri (Weaknesses)</h4>
+                <ul id="commentaryWeaknesses"></ul>
+            </div>
+            <div class="commentary-box">
+                <h4>📊 Sektörel Akran Kıyaslaması (Benchmarking)</h4>
+                <p id="commentaryPeer" style="font-size: 0.85rem; color: #cbd5e1; line-height: 1.55;"></p>
+            </div>
+            <div class="commentary-box">
+                <h4>🎯 Stratejik Eylem ve İyileştirme Önerileri (CFO Advice)</h4>
+                <ul id="commentaryRecs"></ul>
+            </div>
+        </div>
+    </div>
+
+    <!-- Hafta 4 Yeni: 3 Yıllık Tarihsel Trend Analizi ve Altman Z-Score İflas Modeli -->
+    <div class="card">
+        <div class="card-header">
+            <div>
+                <span class="card-title">📈 3 Yıllık Tarihsel Trend ve Altman Z-Score İflas Modeli (2021 - 2023)</span>
+                <p style="font-size: 0.8rem; color: var(--text-muted); margin-top: 4px;" id="trendSubTitle">Dönemler arası büyüme oranları, rasyo değişimleri ve iflas olasılığı gidişatı</p>
+            </div>
+            <span id="trendTrajectoryBadge" class="tag tag-low">Gidişat: Pozitif</span>
+        </div>
+
+        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 12px; margin-bottom: 16px;">
+            <div class="score-pill">
+                <div class="lbl">3 Yıllık Ciro Büyümesi (CAGR)</div>
+                <div class="val" id="valTrendCagrSales" style="color: var(--accent-green);">%0.0</div>
+            </div>
+            <div class="score-pill">
+                <div class="lbl">Finansal Sağlık Trend Skoru</div>
+                <div class="val" id="valTrendScore" style="color: var(--accent-blue);">0 / 100</div>
+            </div>
+            <div class="score-pill">
+                <div class="lbl">Son Dönem Altman Z-Score</div>
+                <div class="val" id="valAltmanZ" style="color: var(--accent-amber);">0.00</div>
+            </div>
+            <div class="score-pill">
+                <div class="lbl">Altman İflas Riski Sınıfı</div>
+                <div class="val" id="valAltmanZone" style="font-size: 1.05rem;">-</div>
+            </div>
+        </div>
+
+        <div style="overflow-x: auto;">
+            <table>
+                <thead>
+                    <tr>
+                        <th>Dönem</th>
+                        <th>Net Satışlar (TL)</th>
+                        <th>Net Dönem Kârı (TL)</th>
+                        <th>Cari Oran</th>
+                        <th>Kaldıraç Oranı</th>
+                        <th>Net Kâr Marjı</th>
+                        <th>Altman Z-Score</th>
+                        <th>İflas Güvenlik Durumu</th>
+                    </tr>
+                </thead>
+                <tbody id="trendPeriodsTableBody"></tbody>
+            </table>
+        </div>
+    </div>
+
     <!-- Canlı Yeni Şirket Bilanço Simülatörü -->
     <div class="card" style="margin-bottom: 24px;">
         <div class="card-header">
@@ -344,7 +502,7 @@ class DashboardGenerator:
     <!-- Tüm Şirketler Genel Sıralama Tablosu -->
     <div class="card">
         <div class="card-header">
-            <span class="card-title">Tüm Şirketler Sektörel Performans ve Hibrit Anomali Sıralaması</span>
+            <span class="card-title">Tüm Şirketler Sektörel Performans, Trend ve Hibrit Anomali Sıralaması</span>
         </div>
         <div style="overflow-x: auto;">
             <table>
@@ -354,12 +512,12 @@ class DashboardGenerator:
                         <th>Şirket Adı</th>
                         <th>Sektör</th>
                         <th>Cari Oran</th>
-                        <th>Finansal Kaldıraç</th>
-                        <th>Net Kâr Marjı</th>
+                        <th>Kaldıraç</th>
+                        <th>Net Kâr M.</th>
                         <th>ROE</th>
-                        <th>İstatistik Skoru</th>
-                        <th>Isolation Forest (ML)</th>
-                        <th>Hibrit Risk Puanı</th>
+                        <th>Altman Z</th>
+                        <th>Trend Sağlık</th>
+                        <th>Hibrit Risk</th>
                         <th>Risk Durumu</th>
                     </tr>
                 </thead>
@@ -433,7 +591,9 @@ function renderSelectedCompany() {{
 
     const comp = DATA.companies.find(c => c.code === code);
     const compReport = DATA.comparisons[code];
-    const risk = DATA.hybrid_reports[code];
+    const risk = DATA.hybrid_reports[code] || {{ hybrid_risk_score: 0, isolation_forest_score: 0, statistical_rule_score: 0, knn_outlier_score: 0, hybrid_risk_level: 'Normal', critical_flags: [], anomalies: [] }};
+    const trend = DATA.trend_reports[code];
+    const comm = DATA.commentaries[code];
 
     document.getElementById('selectedCompanyTitle').textContent = `${{comp.name}} [${{comp.code}}]`;
     document.getElementById('sectorNameLabel').textContent = `Sektör: ${{comp.sector}} (${{comp.period}})`;
@@ -485,6 +645,58 @@ function renderSelectedCompany() {{
         `;
     }});
 
+    // Akıllı Finansal Yorum Asistanı Render
+    if (comm) {{
+        document.getElementById('commentaryBrief').textContent = comm.executive_brief;
+        const strUl = document.getElementById('commentaryStrengths');
+        strUl.innerHTML = '';
+        comm.strengths.forEach(s => {{ strUl.innerHTML += `<li class="str">${{s}}</li>`; }});
+
+        const weakUl = document.getElementById('commentaryWeaknesses');
+        weakUl.innerHTML = '';
+        comm.weaknesses.forEach(w => {{ weakUl.innerHTML += `<li class="weak">${{w}}</li>`; }});
+
+        document.getElementById('commentaryPeer').textContent = comm.peer_benchmarking;
+
+        const recUl = document.getElementById('commentaryRecs');
+        recUl.innerHTML = '';
+        comm.recommendations.forEach(r => {{ recUl.innerHTML += `<li class="rec">${{r}}</li>`; }});
+
+        const cBadge = document.getElementById('commentaryRiskBadge');
+        cBadge.textContent = comm.risk_verdict;
+        cBadge.className = 'tag ' + (risk.hybrid_risk_score >= 55 ? 'tag-high' : (risk.hybrid_risk_score >= 25 ? 'tag-med' : 'tag-low'));
+    }}
+
+    // Trend & Altman Z-Score Render
+    if (trend) {{
+        document.getElementById('valTrendCagrSales').textContent = trend.cagr_sales !== null ? `%${{trend.cagr_sales.toFixed(1)}}` : 'N/A';
+        document.getElementById('valTrendScore').textContent = `${{trend.trend_score.toFixed(1)}} / 100`;
+        document.getElementById('valAltmanZ').textContent = trend.latest_altman.toFixed(2);
+        document.getElementById('valAltmanZone').textContent = trend.latest_altman_zone;
+
+        const tBadge = document.getElementById('trendTrajectoryBadge');
+        tBadge.textContent = trend.trend_direction;
+        tBadge.className = 'tag ' + (trend.trend_badge === 'POSITIVE' ? 'tag-low' : (trend.trend_badge === 'STABLE' ? 'tag-med' : 'tag-high'));
+
+        const trendTbody = document.getElementById('trendPeriodsTableBody');
+        trendTbody.innerHTML = '';
+        trend.periods.forEach(p => {{
+            const zTagCls = p.altman_status === 'SAFE' ? 'tag-low' : (p.altman_status === 'GRAY' ? 'tag-med' : 'tag-high');
+            trendTbody.innerHTML += `
+                <tr>
+                    <td><strong>${{p.period}}</strong></td>
+                    <td>₺${{(p.net_sales / 1000000).toFixed(1)}} M</td>
+                    <td style="color: ${{p.net_profit >= 0 ? '#34d399' : '#f87171'}};">₺${{(p.net_profit / 1000000).toFixed(1)}} M</td>
+                    <td>${{(p.current_ratio || 0).toFixed(2)}}</td>
+                    <td>${{(p.financial_leverage || 0).toFixed(2)}}</td>
+                    <td>%${{((p.net_profit_margin || 0) * 100).toFixed(1)}}</td>
+                    <td><strong>${{p.altman_z.toFixed(2)}}</strong></td>
+                    <td><span class="tag ${{zTagCls}}">${{p.altman_zone}}</span></td>
+                </tr>
+            `;
+        }});
+    }}
+
     drawRadarChart(compReport.comparisons);
     drawBarChart(compReport.comparisons);
 }}
@@ -528,7 +740,6 @@ function drawRadarChart(comparisons) {{
         const cVal = found.company_value || 0;
         const sVal = found.sector_mean || 0.1;
 
-        // Sektör ortalamasını 0.60 referans yarıçapına sabitleyip şirketi orantıla
         let ratio = sVal !== 0 ? (cVal / Math.abs(sVal)) * 0.60 : 0.5;
         if (cVal < 0) ratio = 0.12;
         const normComp = Math.min(1.0, Math.max(0.1, ratio));
@@ -577,14 +788,17 @@ function renderAllCompaniesTable() {{
     tbody.innerHTML = '';
 
     DATA.companies.forEach(c => {{
-        const rep = DATA.hybrid_reports[c.code];
+        const rep = DATA.hybrid_reports[c.code] || {{ hybrid_risk_score: 0, hybrid_risk_level: 'Normal' }};
         const comp = DATA.comparisons[c.code].comparisons;
+        const trend = DATA.trend_reports[c.code] || {{ trend_score: 50, trend_direction: 'Stabil', latest_altman: 0 }};
+
         const getVal = (m) => {{
             const f = comp.find(x => x.metric === m);
             return f && f.company_value !== null ? f.company_value : 0;
         }};
 
         const tagCls = rep.hybrid_risk_score >= 55 ? 'tag-high' : (rep.hybrid_risk_score >= 25 ? 'tag-med' : 'tag-low');
+        const trendCls = trend.trend_score >= 70 ? 'tag-low' : (trend.trend_score >= 45 ? 'tag-med' : 'tag-high');
 
         tbody.innerHTML += `
             <tr style="cursor: pointer;" onclick="document.getElementById('companySelect').value='${{c.code}}'; renderSelectedCompany();">
@@ -595,8 +809,8 @@ function renderAllCompaniesTable() {{
                 <td>${{getVal('financial_leverage').toFixed(2)}}</td>
                 <td>%${{(getVal('net_profit_margin') * 100).toFixed(1)}}</td>
                 <td>%${{(getVal('roe') * 100).toFixed(1)}}</td>
-                <td>${{rep.statistical_rule_score.toFixed(1)}}</td>
-                <td>${{rep.isolation_forest_score.toFixed(1)}}</td>
+                <td><strong>${{trend.latest_altman.toFixed(2)}}</strong></td>
+                <td><span class="tag ${{trendCls}}">${{trend.trend_score.toFixed(0)}}/100</span></td>
                 <td><strong>${{rep.hybrid_risk_score.toFixed(1)}} / 100</strong></td>
                 <td><span class="tag ${{tagCls}}">${{rep.hybrid_risk_level}}</span></td>
             </tr>
@@ -621,7 +835,6 @@ function runLiveSimulation() {{
     const acidRatio = (curAssets - inv) / shortDebt;
     const lev = totalDebt / totalAssets;
     const npm = netProfit / sales;
-    const roa = netProfit / totalAssets;
 
     let penalty = 0;
     let flags = [];
