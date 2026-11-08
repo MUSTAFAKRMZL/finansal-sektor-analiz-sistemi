@@ -1,8 +1,8 @@
 """
 main.py
 Şirketlerin Finansal Performansını Sektörleriyle Karşılaştıran Akıllı Analiz Sistemi
-Hafta 4 (v0.4.0): Çok Dönemli Zaman Serisi (Trend), Altman Z-Score İflas Riski Modeli,
-Akıllı Finansal Yorum Asistanı ve Tek Tıkla Yazdırılabilir Finansal Karne.
+Hafta 5 (v0.5.0 - Faz 2): Canlı Web Sunucusu ve REST API Katmanı, SQLite Dinamik Veri Yeniden Yükleme,
+Çok Dönemli Zaman Serisi (Trend), Altman Z-Score ve Akıllı Finansal Yorum Asistanı.
 """
 import os
 import sys
@@ -32,8 +32,8 @@ def main():
         sys.stdout.reconfigure(encoding="utf-8")
 
     print("=" * 96)
-    print("  AKILLI FİNANSAL PERFORMANS VE SEKTÖREL ANOMALİ ANALİZ SİSTEMİ (v0.4.0)  ")
-    print("  Yazılım Geliştirme I - Hafta 4: Zaman Serisi (Trend), Altman Z-Score & Akıllı Yorum Asistanı  ")
+    print("  AKILLI FİNANSAL PERFORMANS VE SEKTÖREL ANOMALİ ANALİZ SİSTEMİ (v0.5.0)  ")
+    print("  Yazılım Geliştirme I - Hafta 5 (Faz 2): Canlı REST API Sunucusu & SQLite Analiz Platformu  ")
     print("=" * 96)
 
     base_dir = os.path.dirname(os.path.abspath(__file__))
@@ -149,7 +149,7 @@ def main():
     print("=" * 96)
 
     if "--serve" in sys.argv:
-        DashboardGenerator.serve_dashboard(port=8080)
+        DashboardGenerator.serve_dashboard(port=8080, db_path=db_path)
 
 if __name__ == "__main__":
     main()

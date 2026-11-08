@@ -271,11 +271,11 @@ class DashboardGenerator:
 <header>
     <div class="brand">
         <h1>Şirketlerin Finansal Performansını Sektörleriyle Karşılaştıran Akıllı Analiz Sistemi</h1>
-        <p>Yazılım Geliştirme I • Hafta 4: Çok Dönemli Zaman Serisi (Trend), Altman Z-Score İflas Modeli ve Akıllı Finansal Yorum Asistanı</p>
+        <p>Yazılım Geliştirme I • Hafta 5 (Faz 2): Canlı Web Sunucusu, REST API Mimarisi & Karar Destek Platformu</p>
     </div>
     <div class="header-actions">
         <button class="btn-print" onclick="window.print()">🖨️ Şirket Finansal Karnesini Yazdır / PDF</button>
-        <div class="badge-version">Sürüm v0.4.0 • Karar Destek & Trend Analizi Aktif</div>
+        <div id="apiStatusBadge" class="badge-version">🟡 Çevrimdışı Statik Mod • Sürüm v0.5.0</div>
     </div>
 </header>
 
@@ -528,9 +528,36 @@ class DashboardGenerator:
 </div>
 
 <script>
-const DATA = {json_payload};
+let DATA = {json_payload};
+let API_CONNECTED = false;
 
-function initDashboard() {{
+async function tryConnectLiveAPI() {{
+    if (!window.location.protocol.startsWith('http')) {{
+        return false;
+    }}
+    try {{
+        const healthRes = await fetch('/api/health');
+        if (!healthRes.ok) return false;
+        const health = await healthRes.json();
+        const dashRes = await fetch('/api/dashboard-data');
+        if (dashRes.ok) {{
+            DATA = await dashRes.json();
+            API_CONNECTED = true;
+            const badge = document.getElementById('apiStatusBadge');
+            badge.textContent = `🟢 Canlı REST API Aktif (v${{health.version}}) • SQLite Bağlı`;
+            badge.style.background = 'rgba(16, 185, 129, 0.18)';
+            badge.style.color = '#34d399';
+            badge.style.borderColor = 'rgba(16, 185, 129, 0.45)';
+            return true;
+        }}
+    }} catch (e) {{
+        console.log('REST API ulaşılamadı, statik mod kullanılıyor.');
+    }}
+    return false;
+}}
+
+async function initDashboard() {{
+    await tryConnectLiveAPI();
     const companies = DATA.companies;
     const sectors = Object.keys(DATA.sector_benchmarks);
 
@@ -551,6 +578,8 @@ function initDashboard() {{
 
     const sectorSelect = document.getElementById('sectorSelect');
     const simSector = document.getElementById('simSector');
+    sectorSelect.innerHTML = '<option value="ALL">Tüm Sektörler</option>';
+    simSector.innerHTML = '';
     sectors.forEach(s => {{
         const opt = document.createElement('option');
         opt.value = s; opt.textContent = s;
@@ -818,7 +847,7 @@ function renderAllCompaniesTable() {{
     }});
 }}
 
-function runLiveSimulation() {{
+async function runLiveSimulation() {{
     const name = document.getElementById('simName').value || 'Simülasyon A.Ş.';
     const sector = document.getElementById('simSector').value;
     const curAssets = parseFloat(document.getElementById('simCurAssets').value) || 0;
@@ -830,6 +859,45 @@ function runLiveSimulation() {{
     const equity = parseFloat(document.getElementById('simEquity').value) || 1;
     const sales = parseFloat(document.getElementById('simSales').value) || 1;
     const netProfit = parseFloat(document.getElementById('simNetProfit').value) || 0;
+
+    const box = document.getElementById('simResultBox');
+
+    if (API_CONNECTED) {{
+        try {{
+            box.textContent = '⏳ Python Backend REST API üzerinde analiz ediliyor...';
+            const res = await fetch('/api/analyze', {{
+                method: 'POST',
+                headers: {{ 'Content-Type': 'application/json' }},
+                body: JSON.stringify({{
+                    name, sector,
+                    current_assets: curAssets,
+                    inventories: inv,
+                    cash: cash,
+                    total_assets: totalAssets,
+                    short_term_debt: shortDebt,
+                    total_debt: totalDebt,
+                    equity: equity,
+                    net_sales: sales,
+                    net_profit: netProfit
+                }})
+            }});
+            const apiData = await res.json();
+            if (res.ok) {{
+                const rLiq = apiData.ratios.liquidity;
+                const rLev = apiData.ratios.leverage;
+                const rProf = apiData.ratios.profitability;
+                const alt = apiData.altman;
+                const risk = apiData.risk_report;
+                const sBench = apiData.sector_benchmarks;
+                const secCurStr = sBench.current_ratio_mean ? sBench.current_ratio_mean.toFixed(2) : '-';
+                const secLevStr = sBench.financial_leverage_mean ? sBench.financial_leverage_mean.toFixed(2) : '-';
+                box.innerHTML = `[REST API: ${{apiData.name}}] Cari Oran: ${{(rLiq.current_ratio || 0).toFixed(2)}} (Sektör: ${{secCurStr}}) | Kaldıraç: ${{(rLev.financial_leverage || 0).toFixed(2)}} (Sektör: ${{secLevStr}}) | Net Kâr Marjı: %${{((rProf.net_profit_margin || 0)*100).toFixed(1)}} | Altman Z: ${{alt.z_score.toFixed(2)}} (${{alt.zone}}) | Python Risk Skoru: ${{risk.risk_score.toFixed(1)}}/100<br><span style="color: #94a3b8; font-weight: 400; font-size: 0.85rem;">💬 Özet: ${{apiData.commentary.executive_brief}}</span>`;
+                return;
+            }}
+        }} catch (err) {{
+            console.warn('API simülasyonu başarısız, yerel hesaplamaya geçiliyor:', err);
+        }}
+    }}
 
     const curRatio = curAssets / shortDebt;
     const acidRatio = (curAssets - inv) / shortDebt;
@@ -848,7 +916,6 @@ function runLiveSimulation() {{
     const secCur = (bench['liquidity.current_ratio'] || {{}}).mean || 1.5;
     const secLev = (bench['leverage.financial_leverage'] || {{}}).mean || 0.5;
 
-    const box = document.getElementById('simResultBox');
     const flagText = flags.length > 0 ? `Uyarılar: ${{flags.join(', ')}}` : 'Finansal göstergeler dengeli.';
     box.innerHTML = `[${{name}}] Cari Oran: ${{curRatio.toFixed(2)}} (Sektör: ${{secCur.toFixed(2)}}) | Kaldıraç: ${{lev.toFixed(2)}} (Sektör: ${{secLev.toFixed(2)}}) | Net Kâr Marjı: %${{(npm*100).toFixed(1)}} | Tahmini Risk Puanı: ${{Math.min(100, penalty)}}/100 (${{flagText}})`;
 }}
@@ -863,8 +930,11 @@ window.addEventListener('DOMContentLoaded', initDashboard);
         return os.path.abspath(output_path)
 
     @staticmethod
-    def serve_dashboard(port: int = 8080):
-        """Yerel HTTP sunucusu başlatarak dashboard.html dosyasını sunar."""
-        server = HTTPServer(("127.0.0.1", port), SimpleHTTPRequestHandler)
-        print(f"Web Dashboard sunucusu başlatıldı: http://127.0.0.1:{port}/dashboard.html")
+    def serve_dashboard(port: int = 8080, db_path: str = "financial_analysis.db"):
+        """Canlı REST API ve Web Dashboard sunucusunu başlatır."""
+        from src.api_server import create_api_server
+        static_dir = os.path.dirname(os.path.abspath("dashboard.html")) or "."
+        server = create_api_server(host="127.0.0.1", port=port, db_path=db_path, static_dir=static_dir)
+        print(f"Canlı REST API & Web Dashboard sunucusu başlatıldı: http://127.0.0.1:{port}/dashboard.html")
+        print(f"API Sağlık Kontrolü: http://127.0.0.1:{port}/api/health")
         server.serve_forever()

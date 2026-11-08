@@ -241,7 +241,32 @@ class DatabaseManager:
             LEFT JOIN calculated_ratios r ON c.id = r.company_id AND fs.period = r.period
             LEFT JOIN anomaly_evaluations a ON c.id = a.company_id AND fs.period = a.period
             WHERE c.code = ?
-            ORDER BY a.id DESC LIMIT 1
+            ORDER BY fs.period DESC, a.id DESC LIMIT 1
             """, (company_code,))
             row = cursor.fetchone()
             return dict(row) if row else None
+
+    def load_companies_from_db(self) -> List[Company]:
+        """Veritabanındaki tüm şirket-dönem kayıtlarını Company nesneleri olarak geri yükler."""
+        with self.get_connection() as conn:
+            cursor = conn.cursor()
+            cursor.execute("""
+            SELECT c.code, c.name, c.sector, fs.period, fs.raw_json
+            FROM financial_statements fs
+            INNER JOIN companies c ON fs.company_id = c.id
+            ORDER BY c.sector, c.code, fs.period
+            """)
+            companies: List[Company] = []
+            for row in cursor.fetchall():
+                raw = json.loads(row["raw_json"])
+                bs = BalanceSheet(**raw["bs"])
+                inc = IncomeStatement(**raw["inc"])
+                companies.append(Company(
+                    code=row["code"],
+                    name=row["name"],
+                    sector=row["sector"],
+                    period=row["period"],
+                    balance_sheet=bs,
+                    income_statement=inc
+                ))
+            return companies
